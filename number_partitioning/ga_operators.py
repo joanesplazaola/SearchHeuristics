@@ -1,5 +1,6 @@
-from number_partitioning.solution_selectors import *
+from number_partitioning.solution_selectors import get_initial_solution, grasp_function_imanol, grasp_function_izaro_v2
 from number_partitioning.objective_function import objective_function
+import random
 
 
 def create_offsprings(parents, num_offspring):
@@ -34,9 +35,9 @@ def repair_offspring(offspring, index, n):
     indexes = [i for i, x in enumerate(offspring) if x == index]
     extra_len = len(indexes) - int(n / 2)
     change_indexes = random.sample(indexes, extra_len)
-    offspring = np.array(offspring)
-    offspring[change_indexes] = 1 - index
-    return list(offspring)
+    for i in change_indexes:
+        offspring[i] = 1 - index
+    return offspring
 
 
 def mutate(ind):
@@ -50,9 +51,10 @@ def mutate(ind):
 
 
 def select(individuals, fitnesses, parent_num):
-    ind = np.argpartition(fitnesses, parent_num)[:parent_num]
 
-    return list(map(list, np.array(individuals)[ind]))
+    sorted_fitnesses = sorted(enumerate(fitnesses), key=lambda x: x[1])
+    best_indexes = list(zip(*sorted_fitnesses))[0][:parent_num]
+    return [individuals[index] for index in best_indexes]
 
 
 def evaluate(data, individuals):
@@ -69,6 +71,6 @@ def genetic_algorithm(data, population=100, generations=100, parent_num=100, sol
         pop[:parent_num] = parents
         pop[parent_num:] = offsprings
 
-    best_index = np.argmin(fitnesses)
+    best_index = fitnesses.index(min(fitnesses))
 
     return pop[best_index], fitnesses[best_index]
