@@ -13,12 +13,10 @@ numbers = [10]
 best_better = defaultdict(list)
 best_best = defaultdict(list)
 best_sa = defaultdict(list)
-best_ga = defaultdict(list)
 
 time_better = defaultdict(list)
 time_best = defaultdict(list)
 time_sa = defaultdict(list)
-time_ga = defaultdict(list)
 
 for _ in range(20):
     for num in numbers:
@@ -29,58 +27,48 @@ for _ in range(20):
                 data = data[1:]
 
                 start = time.time()
-                best_ = local_search_multi(data, 100, neighbor_fn=get_best_neighbor)
+                best_ = local_search_multi(data, 50, neighbor_fn=get_best_neighbor)
                 time_best[f"{num}_{instance}"].append(time.time() - start)
 
                 start = time.time()
-                better_ = local_search_multi(data, 100, neighbor_fn=get_better_neighbor)
+                better_ = local_search_multi(data, 50, neighbor_fn=get_better_neighbor)
                 time_better[f"{num}_{instance}"].append(time.time() - start)
 
                 start = time.time()
                 sa_ = local_search_multi(data, 50, neighbor_fn=get_neighbor_SA, )
                 time_sa[f"{num}_{instance}"].append(time.time() - start)
 
-                start = time.time()
-                ga_ = genetic_algorithm(data, len(data) * 15, 30, int(len(data) / 4))[1]
-                time_ga[f"{num}_{instance}"].append(time.time() - start)
-
                 best_better[f"{num}_{instance}"].append(better_)
                 best_best[f"{num}_{instance}"].append(best_)
                 best_sa[f"{num}_{instance}"].append(sa_)
-                best_ga[f"{num}_{instance}"].append(ga_)
 
 all_results = {"Better": best_better,
                "Best": best_best,
                "SimmulatedAnnealing": best_sa,
-               "GeneticAlgorithm": best_ga
                }
 result_dict = defaultdict(dict)
 
 for name, values in all_results.items():
     for k, v in values.items():
         instance = k.split("_")[1]
-        result_dict[k]["Deterministic"] =  deterministic[int(instance) - 1]
+        result_dict[k]["Deterministic"] = deterministic[int(instance) - 1]
 
         result_dict[k][f"{name}_avg"] = format(deterministic[int(instance) - 1] / (sum(v) / len(v)), '.3f')
         result_dict[k][f"{name}_std"] = format(np.std(v), '.3e')
 
-
 df = pd.DataFrame(result_dict).T
-
 
 all_results = {"Better": time_better,
                "Best": time_best,
-               "SimmulatedAnnealing":time_sa,
-               "GeneticAlgorithm": time_ga
+               "SimmulatedAnnealing": time_sa,
                }
 result_dict = defaultdict(dict)
 
 for name, values in all_results.items():
     for k, v in values.items():
         instance = k.split("_")[1]
-        result_dict[k][name] = f"{format((sum(v) / len(v)), '.3e')} ± {format(np.std(v), '.3e') }"
+        result_dict[k][name] = f"{format((sum(v) / len(v)), '.3e')} ± {format(np.std(v), '.3e')}"
 
 df_time = pd.DataFrame(result_dict).T
-
 
 df_time.to_latex()
