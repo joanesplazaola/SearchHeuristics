@@ -37,7 +37,7 @@ for _ in range(20):
                 time_better[f"{num}_{instance}"].append(time.time() - start)
 
                 start = time.time()
-                sa_ = local_search_multi(data, 50, neighbor_fn=get_neighbor_SA, )
+                sa_ = local_search_multi(data, 5, neighbor_fn=get_neighbor_SA, )
                 time_sa[f"{num}_{instance}"].append(time.time() - start)
 
                 start = time.time()

@@ -26,7 +26,7 @@ def get_best_neighbor(numbers, chosen, best, a, b):
     return best_chosen, best_, best_a, best_b
 
 
-def get_neighbor_SA(numbers, chosen, best, a, b, iter_max=2, chain_max=10, c_k=200, w_ck=0.5):
+def get_neighbor_SA(numbers, chosen, best, a, b, iter_max=2, chain_max=30, c_k=35, w_ck=0.75):
     best_a = a
     best_b = b
     best_ = best
@@ -48,11 +48,12 @@ def get_neighbor_SA(numbers, chosen, best, a, b, iter_max=2, chain_max=10, c_k=2
                     best_chosen = chosen_[:]
                     best_a = var_a
                     best_b = var_b
+
                     raise Exception("DELTA NEGATIVE")
                 else:
                     aleat = random.random()
                     # log(delta) erabiltea planteau leike edo c_k handiagoak, diferentziek handiek izin ahal direlako
-                    if 100 * math.e ** (-40 * math.log(delta) / c_k) > aleat:
+                    if 10*math.e ** (-5*math.log(delta) / c_k) > aleat:
                         best_ = value
                         best_chosen = chosen_[:]
                         best_a = var_a
