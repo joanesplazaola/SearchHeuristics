@@ -63,3 +63,19 @@ for name, values in all_results.items():
         result_dict[k][f"{name}_std"] = np.std(v)
 
 df = pd.DataFrame(result_dict).T
+
+
+all_results = {"Better": time_better,
+               "Best": time_best,
+               "SimmulatedAnnealing":time_sa,
+               "GeneticAlgorithm": time_ga
+               }
+result_dict = defaultdict(dict)
+
+for name, values in all_results.items():
+    for k, v in values.items():
+        instance = k.split("_")[1]
+        result_dict[k][f"{name}_avg"] = (sum(v) / len(v))
+        result_dict[k][f"{name}_std"] = np.std(v)
+
+df_time = pd.DataFrame(result_dict).T
