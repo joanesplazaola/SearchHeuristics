@@ -78,7 +78,9 @@ result_dict = defaultdict(dict)
 for name, values in all_results.items():
     for k, v in values.items():
         instance = k.split("_")[1]
-        result_dict[k][f"{name}_avg"] = (sum(v) / len(v))
-        result_dict[k][f"{name}_std"] = np.std(v)
+        result_dict[k][name] = f"{format((sum(v) / len(v)), '.3e')} ± {format(np.std(v), '.3e') }"
 
 df_time = pd.DataFrame(result_dict).T
+
+
+df_time.to_latex()
