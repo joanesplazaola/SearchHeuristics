@@ -59,8 +59,11 @@ result_dict = defaultdict(dict)
 for name, values in all_results.items():
     for k, v in values.items():
         instance = k.split("_")[1]
-        result_dict[k][f"{name}_avg"] = (sum(v) / len(v)) - deterministic[int(instance) - 1]
+        result_dict[k]["Deterministic"] =  deterministic[int(instance) - 1]
+
+        result_dict[k][f"{name}_avg"] = deterministic[int(instance) - 1]/(sum(v) / len(v))
         result_dict[k][f"{name}_std"] = np.std(v)
+
 
 df = pd.DataFrame(result_dict).T
 
