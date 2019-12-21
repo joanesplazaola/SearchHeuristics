@@ -3,13 +3,22 @@ from collections import defaultdict
 from number_partitioning.ga_operators import *
 from number_partitioning.local_search import *
 from number_partitioning.neighbor_selectors import *
+import numpy as np
+import time
 
+deterministic = [269114681010, 118479464640, 202764848496, 1234214659656, 16768974600, 107714458776, 2041905009816,
+                 10048311000, 60287671392, 12743488653]
 instances = range(1, 11)
 numbers = [10]
-best_better = defaultdict(int)
-best_best = defaultdict(int)
-best_sa = defaultdict(int)
-best_ga = defaultdict(int)
+best_better = defaultdict(list)
+best_best = defaultdict(list)
+best_sa = defaultdict(list)
+best_ga = defaultdict(list)
+
+time_better = defaultdict(list)
+time_best = defaultdict(list)
+time_sa = defaultdict(list)
+time_ga = defaultdict(list)
 
 for _ in range(20):
     for num in numbers:
@@ -18,17 +27,39 @@ for _ in range(20):
             with open(f"NumPart/Part{num}Instance{instance}") as file:
                 data = list(map(int, file.readlines()))
                 data = data[1:]
-                best_ = local_search_multi(data, 50, neighbor_fn=get_best_neighbor)
-                better_ = local_search_multi(data, 50, neighbor_fn=get_better_neighbor)
+
+                start = time.time()
+                best_ = local_search_multi(data, 100, neighbor_fn=get_best_neighbor)
+                time_best[f"{num}_{instance}"].append(time.time() - start)
+
+                start = time.time()
+                better_ = local_search_multi(data, 100, neighbor_fn=get_better_neighbor)
+                time_better[f"{num}_{instance}"].append(time.time() - start)
+
+                start = time.time()
                 sa_ = local_search_multi(data, 50, neighbor_fn=get_neighbor_SA, )
-                ga_ = genetic_algorithm(data, len(data)*15, 30, int(len(data)/4))[1]
-                best = min([best_, better_, sa_, ga_])
+                time_sa[f"{num}_{instance}"].append(time.time() - start)
 
-                best_better[f"{num}_{instance}"] += (best_ == best)
-                best_best[f"{num}_{instance}"] += (better_ == best)
-                best_sa[f"{num}_{instance}"] += (sa_ == best)
-                best_ga[f"{num}_{instance}"] += (ga_ == best)
+                start = time.time()
+                ga_ = genetic_algorithm(data, len(data) * 15, 30, int(len(data) / 4))[1]
+                time_ga[f"{num}_{instance}"].append(time.time() - start)
 
-import pandas as pd
+                best_better[f"{num}_{instance}"].append(better_)
+                best_best[f"{num}_{instance}"].append(best_)
+                best_sa[f"{num}_{instance}"].append(sa_)
+                best_ga[f"{num}_{instance}"].append(ga_)
 
-pd.DataFrame([best_sa, best_better, best_best, best_ga], index=["Simulated annealing", "Better", "Best", "Genetic"]).T
+all_results = {"Better": best_better,
+               "Best": best_best,
+               "SimmulatedAnnealing": best_sa,
+               "GeneticAlgorithm": best_ga
+               }
+result_dict = defaultdict(dict)
+
+for name, values in all_results.items():
+    for k, v in values.items():
+        instance = k.split("_")[1]
+        result_dict[k][f"{name}_avg"] = (sum(v) / len(v)) - deterministic[int(instance) - 1]
+        result_dict[k][f"{name}_std"] = np.std(v)
+
+df = pd.DataFrame(result_dict).T
